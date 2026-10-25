@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.pytest_cache/
 
 # Generated outputs (recreated by running the code)
 outputs/

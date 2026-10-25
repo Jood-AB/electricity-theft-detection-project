@@ -1,0 +1,21 @@
+# Shared settings for the whole project.
+# Every script reads its settings from this file, so all four members
+# use the same values. Change a value here, not inside the code.
+
+# Starting number for all random choices (data split, Random Forest,
+# cross-validation). The same seed gives the same results on every run
+# and on every computer.
+random_seed: 42
+
+# Fraction of customers held out for the final test (0.2 = 20%).
+# The test set is used ONCE at the end. All tuning uses the training data.
+test_size: 0.2
+
+# Folder locations, relative to the project's main folder.
+# The two datasets are always kept and processed separately.
+paths:
+  sgcc_raw: data/raw/sgcc/              # original SGCC download
+  oedi_raw: data/raw/oedi/              # original OEDI-based download
+  sgcc_processed: data/processed/sgcc/  # cleaned SGCC data and train/test split
+  oedi_processed: data/processed/oedi/  # cleaned OEDI data and train/test split
+  outputs: outputs/                     # plots, results tables and other generated files
