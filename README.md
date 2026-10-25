@@ -104,10 +104,10 @@ Instructions will be added as each part of the project is completed.
 
 | Member | Role |
 |---|---|
-| Member 1 | Data pipeline and reproducibility |
-| Member 2 | EDA and feature engineering |
-| Member 3 | Baseline models, evaluation and integration |
-| Member 4 | Tuning, efficiency and interpretation |
+| Jood | Data pipeline and reproducibility |
+| Hessa | EDA and feature engineering |
+| Sadeem | Baseline models, evaluation and integration |
+| Asma | Tuning, efficiency and interpretation |
 
 ## Limitations
 
