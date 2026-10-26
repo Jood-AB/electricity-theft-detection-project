@@ -7,9 +7,17 @@
 # and on every computer.
 random_seed: 42
 
-# Fraction of customers held out for the final test (0.2 = 20%).
-# The test set is used ONCE at the end. All tuning uses the training data.
+# How the test set is chosen. The test set is used ONCE at the end.
+# All tuning uses the training data only.
+
+# SGCC: fraction of customers held out for the final test (0.2 = 20%).
+# Each row is one customer, so no customer is in both sets.
 test_size: 0.2
+
+# OEDI: the file holds 4 one-year recordings for each of 16 building types.
+# For each type, this many recordings go to the test set and the rest to
+# training (1 of 4 = 25% test). No recording is in both sets.
+oedi_test_recordings_per_type: 1
 
 # Folder locations, relative to the project's main folder.
 # The two datasets are always kept and processed separately.

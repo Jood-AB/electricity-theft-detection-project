@@ -2,7 +2,8 @@
 # Install them with:  pip install -r requirements.txt
 
 numpy>=1.26        # fast number arrays
-pandas>=2.2        # loading and cleaning tables of data
+pandas==2.2.3      # loading and cleaning tables of data
+                   # (pinned: newer pandas 3.x was blocked by Windows Smart App Control)
 scikit-learn>=1.5  # the three models, data splitting and metrics
 matplotlib>=3.8    # plots
 seaborn>=0.13      # nicer statistical plots, built on matplotlib

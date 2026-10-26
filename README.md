@@ -87,7 +87,19 @@ The exploratory data analysis notebooks run in Google Colab. See
 
 ## How to run
 
-Instructions will be added as each part of the project is completed.
+1. **Clean the data and create the train/test sets** (about 1 minute):
+
+   ```
+   python -m src.prepare_data
+   ```
+
+   Creates `data/processed/sgcc/` and `data/processed/oedi/` (train.csv,
+   test.csv) and a summary in `outputs/data_quality.md`. See
+   [data/README.md](data/README.md) for the cleaning steps and
+   [notebooks/01_data_quality.ipynb](notebooks/01_data_quality.ipynb) for
+   the checks behind them.
+
+More steps will be added as each part of the project is completed.
 
 ## Team rules
 
