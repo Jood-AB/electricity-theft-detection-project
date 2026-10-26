@@ -34,13 +34,20 @@ electricity-theft-detection-project/
 ├── requirements.txt     # Python libraries to install
 ├── config.yaml          # shared settings: random seed, test size, folder paths
 ├── data/                # datasets (downloaded locally, not stored on GitHub)
-│   └── README.md        # how to download each dataset
+│   └── README.md        # how to download each dataset, cleaning steps, citations
 ├── src/                 # all project code
 │   ├── config.py        # reads config.yaml
-│   └── utils.py         # shared helpers, e.g. set_seed()
-├── notebooks/           # EDA notebooks (Google Colab)
-│   └── README.md        # how to use Colab with this project
+│   ├── utils.py         # shared helpers, e.g. set_seed()
+│   ├── data_sgcc.py     # loads and cleans SGCC, splits by customer
+│   ├── data_oedi.py     # loads and cleans OEDI, splits by recording
+│   └── prepare_data.py  # runs both cleanings and saves train/test sets
+├── notebooks/           # notebooks (Google Colab)
+│   ├── README.md        # how to use Colab with this project
+│   └── 01_data_quality.ipynb  # data checks behind each cleaning decision
 └── tests/               # automated checks that the code works
+    ├── test_setup.py      # config and seed
+    ├── test_data_sgcc.py  # SGCC cleaning steps
+    └── test_data_oedi.py  # OEDI cleaning steps
 ```
 
 ## Setup (local, for running the project code)
@@ -87,7 +94,19 @@ The exploratory data analysis notebooks run in Google Colab. See
 
 ## How to run
 
-Instructions will be added as each part of the project is completed.
+1. **Clean the data and create the train/test sets** (about 1 minute):
+
+   ```
+   python -m src.prepare_data
+   ```
+
+   Creates `data/processed/sgcc/` and `data/processed/oedi/` (train.csv,
+   test.csv) and a summary in `outputs/data_quality.md`. See
+   [data/README.md](data/README.md) for the cleaning steps and
+   [notebooks/01_data_quality.ipynb](notebooks/01_data_quality.ipynb) for
+   the checks behind them.
+
+More steps will be added as each part of the project is completed.
 
 ## Team rules
 
