@@ -40,14 +40,17 @@ electricity-theft-detection-project/
 │   ├── utils.py         # shared helpers, e.g. set_seed()
 │   ├── data_sgcc.py     # loads and cleans SGCC, splits by customer
 │   ├── data_oedi.py     # loads and cleans OEDI, splits by recording
-│   └── prepare_data.py  # runs both cleanings and saves train/test sets
+│   ├── prepare_data.py  # runs both cleanings and saves train/test sets
+│   └── features.py      # builds the model features for SGCC and OEDI
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
-│   └── 01_data_quality.ipynb  # data checks behind each cleaning decision
+│   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
+│   └── 02_eda.ipynb           # EDA: class balance, missing data, trends, normal vs theft
 └── tests/               # automated checks that the code works
     ├── test_setup.py      # config and seed
     ├── test_data_sgcc.py  # SGCC cleaning steps
-    └── test_data_oedi.py  # OEDI cleaning steps
+    ├── test_data_oedi.py  # OEDI cleaning steps
+    └── test_features.py   # feature functions
 ```
 
 ## Setup (local, for running the project code)
@@ -106,7 +109,25 @@ The exploratory data analysis notebooks run in Google Colab. See
    [notebooks/01_data_quality.ipynb](notebooks/01_data_quality.ipynb) for
    the checks behind them.
 
-2. **Train the baseline models:**
+2. **Build the features** (inside your own script or notebook):
+
+   ```python
+   from src import features
+
+   X_sgcc = features.sgcc_features(sgcc_train)   # one row per customer
+   y_sgcc = sgcc_train["FLAG"]
+
+   X_oedi = features.oedi_features(oedi_train)   # one row per hour
+   y_oedi = oedi_train["theft"]
+   ```
+
+   The functions return only feature columns: IDs (`CONS_NO`,
+   `recording_id`) and labels (`FLAG`, `theft`, `theft_type`) are never
+   included. Nothing is fitted on the data, so the same functions are
+   applied to the test sets. See the docstrings in `src/features.py` for
+   what each feature means.
+
+3. **Train the baseline models:**
 
    ```
    python -m src.models           # cross-validation on the training data, both datasets
