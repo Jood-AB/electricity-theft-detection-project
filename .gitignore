@@ -12,8 +12,15 @@ venv/
 .ipynb_checkpoints/
 .pytest_cache/
 
-# Generated outputs (recreated by running the code)
-outputs/
+# Generated outputs (recreated by running the code).
+# Saved models are large, so they stay out of git.
+outputs/*
+# Results tables, figures and the data quality report are kept on GitHub,
+# because the report and slides use them.
+!outputs/results/
+!outputs/results/*.csv
+!outputs/figures/
+!outputs/data_quality.md
 
 # Editor and OS files
 .vscode/
