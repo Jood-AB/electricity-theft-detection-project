@@ -105,9 +105,10 @@ def test_oedi_window_stays_inside_one_recording():
 
     first_hour_of_rec2 = df.index[(df["recording_id"] == 2) & (df["hour"] == 0)][0]
     # Recording 2 always uses 1 kW. If the window crossed into recording 1
-    # (100 kW), this average would be far above 1.
-    assert feats.loc[first_hour_of_rec2, "elec_mean_24h"] == 1.0
-    assert feats.loc[first_hour_of_rec2, "elec_std_24h"] == 0.0
+    # (100 kW), the window average would be far above 1, so this hour would
+    # look like a drop and the spread would not be 0.
+    assert feats.loc[first_hour_of_rec2, "elec_vs_mean_24h"] == 1.0
+    assert feats.loc[first_hour_of_rec2, "elec_rel_std_24h"] == 0.0
 
 
 def test_oedi_shuffled_rows_give_the_same_features():
@@ -132,11 +133,33 @@ def test_oedi_drop_to_zero_and_no_division_by_zero():
     feats = features.oedi_features(df)[rec1.to_numpy()]
 
     assert feats["elec_vs_mean_24h"].iloc[23] == 1.0   # usual level
-    assert feats["elec_std_24h"].iloc[23] == 0.0       # steady use
+    assert feats["elec_rel_std_24h"].iloc[23] == 0.0   # steady use
     assert feats["elec_vs_mean_24h"].iloc[24] == 0.0   # sudden drop to zero
     # Hour 49: the whole window is 0, so 0 / 0 must give 0, not NaN.
     assert feats["elec_vs_mean_24h"].iloc[49] == 0.0
+    assert feats["elec_rel_std_24h"].iloc[49] == 0.0
     assert not feats.isnull().any().any()
+
+
+def test_oedi_relative_spread_ignores_building_size():
+    df = make_oedi(hours=48)
+    # Same daily pattern in both recordings, but recording 1 is 100 times bigger.
+    pattern = np.tile([1.0, 3.0], 24)
+    df.loc[df["recording_id"] == 1, "elec_facility_kw"] = 100 * pattern
+    df.loc[df["recording_id"] == 2, "elec_facility_kw"] = pattern
+    feats = features.oedi_features(df)
+
+    big = feats[(df["recording_id"] == 1).to_numpy()]["elec_rel_std_24h"].to_numpy()
+    small = feats[(df["recording_id"] == 2).to_numpy()]["elec_rel_std_24h"].to_numpy()
+    np.testing.assert_allclose(big, small, rtol=1e-5)
+    assert small[-1] > 0   # the pattern does jump around
+
+
+def test_oedi_features_have_no_size_based_columns():
+    # Average and spread in kW mostly say how big the building is, not
+    # whether something unusual happens, so only relative features are kept.
+    feats = features.oedi_features(make_oedi())
+    assert list(feats.columns) == ["hour_of_day", "elec_vs_mean_24h", "elec_rel_std_24h"]
 
 
 def test_oedi_features_exclude_ids_and_labels():

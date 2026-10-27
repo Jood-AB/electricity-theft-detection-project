@@ -138,11 +138,16 @@ def oedi_features(df, window=OEDI_WINDOW_HOURS, usage_col=OEDI_USAGE_COL):
     Returns:
         DataFrame with the same row index and order as df and the columns:
             hour_of_day       0 (midnight) to 23
-            elec_mean_24h     average use over the window
-            elec_std_24h      standard deviation over the window
-                              (close to 0 when use is unnaturally flat)
             elec_vs_mean_24h  this hour's use divided by the window average
                               (1 = usual, near 0 = sudden drop)
+            elec_rel_std_24h  window standard deviation divided by the window
+                              average (close to 0 when use is unnaturally flat)
+
+        Both window features are ratios, so a big and a small building with
+        the same pattern get the same values. The window average and spread
+        in kW are not returned: on the training data, the building alone
+        explains 70-79% of their variation, so they mostly say how big the
+        building is (the same idea as relative_std in SGCC).
     """
     # Sort by recording, then by hour, so every window sees hours in order.
     ordered = df.sort_values(["recording_id", "hour"])
@@ -153,12 +158,12 @@ def oedi_features(df, window=OEDI_WINDOW_HOURS, usage_col=OEDI_USAGE_COL):
     # A window of one hour has no standard deviation (NaN), so use 0.
     std_24h = by_recording.transform(lambda s: s.rolling(window, min_periods=1).std()).fillna(0)
 
+    # A window that is all 0 would give 0 / 0, so we use 0 instead.
+    safe_mean = mean_24h.replace(0, np.nan)
     features = pd.DataFrame({
         "hour_of_day": ordered["hour"] % HOURS_PER_DAY,
-        "elec_mean_24h": mean_24h,
-        "elec_std_24h": std_24h,
-        # A window that is all 0 would give 0 / 0, so we use 0 instead.
-        "elec_vs_mean_24h": (usage / mean_24h.replace(0, np.nan)).fillna(0),
+        "elec_vs_mean_24h": (usage / safe_mean).fillna(0),
+        "elec_rel_std_24h": (std_24h / safe_mean).fillna(0),
     })
 
     # Put the rows back in the order they were given.
