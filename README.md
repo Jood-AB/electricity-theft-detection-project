@@ -127,6 +127,15 @@ The exploratory data analysis notebooks run in Google Colab. See
    applied to the test sets. See the docstrings in `src/features.py` for
    what each feature means.
 
+3. **Train the baseline models:**
+
+   ```
+   python -m src.models           # cross-validation on the training data, both datasets
+   python -m src.models --test    # final test-set scores (run once, at the end)
+   ```
+
+   Results are saved in `outputs/results/` and `outputs/figures/`.
+
 More steps will be added as each part of the project is completed.
 
 ## Team rules
