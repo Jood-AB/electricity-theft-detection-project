@@ -43,7 +43,8 @@ electricity-theft-detection-project/
 │   └── prepare_data.py  # runs both cleanings and saves train/test sets
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
-│   └── 01_data_quality.ipynb  # data checks behind each cleaning decision
+│   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
+│   └── 02_eda.ipynb           # EDA: class balance, missing data, trends, normal vs theft
 └── tests/               # automated checks that the code works
     ├── test_setup.py      # config and seed
     ├── test_data_sgcc.py  # SGCC cleaning steps
