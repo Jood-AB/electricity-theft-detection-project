@@ -30,7 +30,6 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-import yaml
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold, StratifiedKFold, cross_val_predict
@@ -38,12 +37,16 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
+from src.config import load_config
 from src.metrics import best_threshold, evaluate, plot_confusion_matrix
+from src.utils import set_seed
 
-DATA_DIR = Path("data/processed")
-RESULTS_DIR = Path("outputs/results")
-FIGURES_DIR = Path("outputs/figures")
-MODELS_DIR = Path("outputs/models")
+# Folders come from config.yaml (team rule), so they work from any folder
+CONFIG = load_config()
+DATA_DIR = CONFIG["paths"]["sgcc_processed"].parent   # data/processed
+RESULTS_DIR = CONFIG["paths"]["outputs"] / "results"
+FIGURES_DIR = CONFIG["paths"]["outputs"] / "figures"
+MODELS_DIR = CONFIG["paths"]["outputs"] / "models"
 
 # For each dataset: the label column, columns that must NOT be used as
 # features (IDs or the answer), and the column that groups rows for
@@ -55,12 +58,6 @@ DATASETS = {
 }
 
 N_FOLDS = 3  # 3 folds keeps Random Forest fast enough for Colab
-
-
-def load_seed(config_path="config.yaml"):
-    """Read the shared random seed from config.yaml (team rule)."""
-    with open(config_path) as f:
-        return yaml.safe_load(f).get("random_seed", 42)
 
 
 def load_xy(dataset, split="train", data_dir=DATA_DIR):
@@ -198,7 +195,8 @@ def main():
     args = parser.parse_args()
 
     datasets = ["sgcc", "oedi"] if args.dataset == "all" else [args.dataset]
-    seed = load_seed()
+    seed = CONFIG["random_seed"]
+    set_seed(seed)
     for dataset in datasets:
         if args.test:
             print(test_baselines(dataset, args.data_dir, args.tag).round(3).to_string(index=False))
