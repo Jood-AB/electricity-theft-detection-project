@@ -41,7 +41,9 @@ electricity-theft-detection-project/
 │   ├── data_sgcc.py     # loads and cleans SGCC, splits by customer
 │   ├── data_oedi.py     # loads and cleans OEDI, splits by recording
 │   ├── prepare_data.py  # runs both cleanings and saves train/test sets
-│   └── features.py      # builds the model features for SGCC and OEDI
+│   ├── features.py      # builds the model features for SGCC and OEDI
+│   ├── tuning.py        # hyperparameter tuning with cross-validation
+│   └── efficiency.py    # memory and runtime measurements, before/after
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
 │   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
@@ -50,7 +52,9 @@ electricity-theft-detection-project/
     ├── test_setup.py      # config and seed
     ├── test_data_sgcc.py  # SGCC cleaning steps
     ├── test_data_oedi.py  # OEDI cleaning steps
-    └── test_features.py   # feature functions
+    ├── test_features.py   # feature functions
+    ├── conftest.py        # small made-up data shared by the tests below
+    └── test_tuning.py     # tuning and the efficiency changes
 ```
 
 ## Setup (local, for running the project code)
@@ -135,6 +139,27 @@ The exploratory data analysis notebooks run in Google Colab. See
    ```
 
    Results are saved in `outputs/results/` and `outputs/figures/`.
+
+4. **Tune the models** (about 30 minutes on a laptop; uses the training data only):
+
+   ```
+   python -m src.tuning           # cross-validated search, both datasets
+   python -m src.tuning --test    # final test-set scores of the tuned models (run once, at the end)
+   ```
+
+   Saves the scores of the tuned models (`tuned_cv_<dataset>.csv`),
+   every setting tried (`tuning_search_<dataset>.csv`), the search settings
+   and seed (`tuning_settings_<dataset>.json`) and a Decision Tree
+   validation curve in `outputs/figures/`.
+
+5. **Measure memory and runtime** (about 3 minutes):
+
+   ```
+   python -m src.efficiency
+   ```
+
+   Saves before/after numbers for each optimization in
+   `outputs/results/efficiency.csv` and a chart in `outputs/figures/`.
 
 More steps will be added as each part of the project is completed.
 
