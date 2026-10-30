@@ -37,9 +37,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
+from src import features
 from src.config import load_config
 from src.metrics import best_threshold, evaluate, plot_confusion_matrix
-from src.utils import set_seed
+from src.utils import read_csv_in_chunks, set_seed
 
 # Folders come from config.yaml (team rule), so they work from any folder
 CONFIG = load_config()
@@ -60,7 +61,7 @@ DATASETS = {
 N_FOLDS = 3  # 3 folds keeps Random Forest fast enough for Colab
 
 
-def load_xy(dataset, split="train", data_dir=DATA_DIR):
+def load_xy(dataset, split="train", data_dir=DATA_DIR, add_features=False):
     """Load a processed file and return features X, labels y and groups.
 
     Numbers are read as float32 to halve memory. Text columns (such as the
@@ -73,9 +74,15 @@ def load_xy(dataset, split="train", data_dir=DATA_DIR):
     head = pd.read_csv(path, nrows=100)
     not_features = [info["label"]] + info["drop"]
     float_cols = [c for c in head.select_dtypes("number").columns if c not in not_features]
-    df = pd.read_csv(path, dtype={c: "float32" for c in float_cols})
+    # Read in chunks to keep peak memory low (PR 7, see src/utils.py)
+    df = read_csv_in_chunks(path, dtype={c: "float32" for c in float_cols})
 
     X = df[float_cols]
+    if add_features:
+        extra = features.sgcc_features(df) if dataset == "sgcc" else features.oedi_features(df)
+        # missing_share is already a raw SGCC column, so do not add it twice
+        extra = extra.drop(columns=X.columns.intersection(extra.columns))
+        X = pd.concat([X, extra], axis=1)
     y = df[info["label"]].astype(int)
     groups = df[info["group"]] if info["group"] else None
     return X, y, groups
@@ -125,7 +132,7 @@ def sample_rows(X, y, groups, n, seed):
 
 def train_baselines(dataset, seed, sample=None, data_dir=DATA_DIR, tag="raw"):
     """Cross-validate, choose thresholds, then fit and save each model."""
-    X, y, groups = load_xy(dataset, "train", data_dir)
+    X, y, groups = load_xy(dataset, "train", data_dir, add_features=(tag == "features"))
     if sample:
         X, y, groups = sample_rows(X, y, groups, sample, seed)
     print(f"\n{dataset.upper()}: {len(y):,} rows, {X.shape[1]} features, "
@@ -160,7 +167,7 @@ def train_baselines(dataset, seed, sample=None, data_dir=DATA_DIR, tag="raw"):
 
 def test_baselines(dataset, data_dir=DATA_DIR, tag="raw"):
     """Score the saved models on the test set. Use once, for final results."""
-    X, y, _ = load_xy(dataset, "test", data_dir)
+    X, y, _ = load_xy(dataset, "test", data_dir, add_features=(tag == "features"))
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     rows = []
     for name in make_models(seed=0):

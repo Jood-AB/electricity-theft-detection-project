@@ -1,0 +1,102 @@
+{
+  "dataset": "oedi",
+  "rows": 420480,
+  "columns": 14,
+  "feature_set": "raw readings + engineered features",
+  "random_seed": 42,
+  "cv": "GroupKFold(3) by recording_id",
+  "scoring": "average_precision (PR-AUC)",
+  "n_iter_random_search": 12,
+  "threshold_rule": "highest F1 on cross-validated training predictions",
+  "sample": null,
+  "models": {
+    "Logistic Regression": {
+      "search": "GridSearchCV",
+      "space": {
+        "logisticregression__C": [
+          0.001,
+          0.01,
+          0.1,
+          1.0,
+          10.0,
+          100.0
+        ]
+      },
+      "candidates_tried": 6,
+      "best_params": {
+        "logisticregression__C": 10.0
+      },
+      "best_val_pr_auc": 0.6769667226878106,
+      "best_train_pr_auc": 0.6775796167748694,
+      "search_seconds": 3.4
+    },
+    "Decision Tree": {
+      "search": "RandomizedSearchCV",
+      "space": {
+        "max_depth": [
+          4,
+          6,
+          8,
+          10,
+          15,
+          20,
+          null
+        ],
+        "min_samples_leaf": [
+          1,
+          5,
+          20,
+          50,
+          100
+        ],
+        "criterion": [
+          "gini",
+          "entropy"
+        ]
+      },
+      "candidates_tried": 12,
+      "best_params": {
+        "min_samples_leaf": 100,
+        "max_depth": 10,
+        "criterion": "entropy"
+      },
+      "best_val_pr_auc": 0.8643403584200158,
+      "best_train_pr_auc": 0.9217617376910482,
+      "search_seconds": 19.6
+    },
+    "Random Forest": {
+      "search": "RandomizedSearchCV",
+      "space": {
+        "n_estimators": [
+          100,
+          300
+        ],
+        "max_depth": [
+          10,
+          20,
+          null
+        ],
+        "min_samples_leaf": [
+          1,
+          3,
+          10
+        ],
+        "max_features": [
+          "sqrt",
+          0.5,
+          1.0
+        ]
+      },
+      "candidates_tried": 12,
+      "best_params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "max_depth": 20
+      },
+      "best_val_pr_auc": 0.9533893203204892,
+      "best_train_pr_auc": 0.999497234149333,
+      "search_seconds": 1488.8
+    }
+  }
+}

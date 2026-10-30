@@ -19,6 +19,7 @@ outputs/*
 # because the report and slides use them.
 !outputs/results/
 !outputs/results/*.csv
+!outputs/results/*.json
 !outputs/figures/
 !outputs/data_quality.md
 

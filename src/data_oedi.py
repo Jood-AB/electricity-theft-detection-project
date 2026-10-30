@@ -23,7 +23,8 @@ Cleaning steps, in order:
 """
 
 import numpy as np
-import pandas as pd
+
+from src.utils import read_csv_in_chunks
 
 HOURS_PER_YEAR = 8760
 ROW_NUMBER_COL = "0"
@@ -61,7 +62,8 @@ def load_oedi(csv_path):
     dtypes = {raw: np.float32 for raw in RENAME if raw != TYPE_COL_RAW}
     dtypes[TYPE_COL_RAW] = str
     dtypes[LABEL_COL_RAW] = str
-    return pd.read_csv(csv_path, dtype=dtypes)
+    # Read in chunks to keep peak memory low (PR 7, see src/utils.py).
+    return read_csv_in_chunks(csv_path, dtype=dtypes)
 
 
 def add_recording_ids(df):
