@@ -17,10 +17,16 @@ Feature importance (permutation importance): on each validation fold, the
 values of one feature (or one group of features) are shuffled between rows
 and we measure how much PR-AUC drops. A big drop means the model leans on
 that feature. The 1,035 SGCC daily readings are shuffled together as one
-group, because one day on its own says little. Important: this shows what
-the MODEL uses, not what causes theft. When two features carry the same
-information (e.g. mean and maximum use), they share the importance, so
-each may look less important than it is.
+group, because one day on its own says little. When two features carry the
+same information (e.g. mean and maximum use), they share the importance, so
+each may look less important than it is. That is why all engineered
+features (from src/features.py) are also shuffled together as one group,
+which shows what they add as a set. Important: this shows what the MODEL
+uses, not what causes theft.
+
+Limitation (OEDI): the most important OEDI columns are end-use readings
+(equipment, lights, fans, water heater). A real utility usually sees only
+the main meter, so in practice a model would have less to work with.
 
 Run from the project folder (after python -m src.tuning):
     python -m src.error_analysis
@@ -65,6 +71,8 @@ TOP_SHARES = [0.01, 0.05, 0.10, 0.20]
 # SGCC features compared between outcomes (from src/features.py).
 SGCC_PROFILE_FEATURES = ["mean_use", "relative_std", "zero_days", "sudden_drops",
                          "missing_share", "max_use"]
+# OEDI columns made by features.oedi_features (the rest are raw readings).
+OEDI_ENGINEERED = ["hour_of_day", "elec_vs_mean_24h", "elec_rel_std_24h"]
 
 
 # ----------------------------------------------------------- predictions
@@ -81,14 +89,21 @@ def feature_groups(dataset, columns):
     """Columns shuffled together in permutation importance.
 
     SGCC: all daily readings form one group; every other column is its own
-    group. OEDI: every column is its own group.
+    group. OEDI: every column is its own group. On both datasets, all
+    engineered features are also shuffled together as one extra group.
     """
     if dataset == "sgcc":
         days = [c for c in columns if c[:4].isdigit()]   # named "YYYY-MM-DD"
+        # Every SGCC column that is not a day comes from features.sgcc_features.
+        engineered = [c for c in columns if c not in days]
         groups = {f"daily readings ({len(days):,} days)": days}
-        groups.update({c: [c] for c in columns if c not in days})
-        return groups
-    return {c: [c] for c in columns}
+        groups.update({c: [c] for c in engineered})
+    else:
+        engineered = [c for c in columns if c in OEDI_ENGINEERED]
+        groups = {c: [c] for c in columns}
+    if engineered:
+        groups[f"all engineered features ({len(engineered)})"] = engineered
+    return groups
 
 
 def permutation_drop(model, X_val, y_val, columns, rng, n_repeats=N_REPEATS):
@@ -324,6 +339,8 @@ def analyse(dataset, seed, model_name="Random Forest", use_test=False, data_dir=
         # Text columns left out of X; same file, so the rows line up.
         info = pd.read_csv(Path(data_dir) / "oedi" / f"{split}.csv",
                            usecols=["building_type", "theft_type", "theft"])
+        assert len(info) == len(outcome) and (info["theft"].to_numpy() == y.to_numpy()).all(), \
+            "OEDI file rows no longer line up with the predictions"
         by_type, by_building = oedi_breakdowns(info, outcome)
         by_type.to_csv(out / f"errors_oedi_{suffix}_by_theft_type.csv", index=False)
         by_building.to_csv(out / f"errors_oedi_{suffix}_by_building.csv", index=False)

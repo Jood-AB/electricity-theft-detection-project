@@ -38,8 +38,11 @@ def test_sgcc_daily_readings_are_one_importance_group():
     groups = ea.feature_groups("sgcc", columns)
     assert groups["daily readings (2 days)"] == ["2014-01-01", "2014-01-02"]
     assert groups["mean_use"] == ["mean_use"]
-    assert ea.feature_groups("oedi", ["hour", "elec_facility_kw"]) == {
-        "hour": ["hour"], "elec_facility_kw": ["elec_facility_kw"]}
+    # All engineered features are also shuffled together.
+    assert groups["all engineered features (2)"] == ["mean_use", "missing_share"]
+    assert ea.feature_groups("oedi", ["hour", "elec_facility_kw", "hour_of_day"]) == {
+        "hour": ["hour"], "elec_facility_kw": ["elec_facility_kw"],
+        "hour_of_day": ["hour_of_day"], "all engineered features (1)": ["hour_of_day"]}
 
 
 def test_shuffling_a_useless_feature_changes_nothing():
