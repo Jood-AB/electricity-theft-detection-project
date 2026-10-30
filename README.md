@@ -43,7 +43,8 @@ electricity-theft-detection-project/
 │   ├── prepare_data.py  # runs both cleanings and saves train/test sets
 │   ├── features.py      # builds the model features for SGCC and OEDI
 │   ├── tuning.py        # hyperparameter tuning with cross-validation
-│   └── efficiency.py    # memory and runtime measurements, before/after
+│   ├── efficiency.py    # memory and runtime measurements, before/after
+│   └── error_analysis.py  # false positives/negatives and feature importance
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
 │   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
@@ -54,7 +55,8 @@ electricity-theft-detection-project/
     ├── test_data_oedi.py  # OEDI cleaning steps
     ├── test_features.py   # feature functions
     ├── conftest.py        # small made-up data shared by the tests below
-    └── test_tuning.py     # tuning and the efficiency changes
+    ├── test_tuning.py     # tuning and the efficiency changes
+    └── test_error_analysis.py  # error analysis tables and importance
 ```
 
 ## Setup (local, for running the project code)
@@ -160,6 +162,19 @@ The exploratory data analysis notebooks run in Google Colab. See
 
    Saves before/after numbers for each optimization in
    `outputs/results/efficiency.csv` and a chart in `outputs/figures/`.
+
+6. **Analyse the errors of the tuned Random Forest** (about 5 minutes, after step 4):
+
+   ```
+   python -m src.error_analysis          # cross-validated predictions on the training data
+   python -m src.error_analysis --test   # test-set errors (only after the final test run)
+   ```
+
+   Saves who is wrongly flagged (false positives) and who is missed (false
+   negatives), OEDI errors by theft type and building type, the theft share
+   among the highest-risk rows, and permutation feature importance
+   (`errors_*.csv`, `importance_*.csv` and figures). Importance shows what
+   the model relies on, not what causes theft.
 
 More steps will be added as each part of the project is completed.
 
