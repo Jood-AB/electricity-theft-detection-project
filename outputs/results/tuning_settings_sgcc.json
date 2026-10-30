@@ -28,7 +28,7 @@
       },
       "best_val_pr_auc": 0.2851547900023466,
       "best_train_pr_auc": 0.371884495257252,
-      "search_seconds": 51.3
+      "search_seconds": 34.3
     },
     "Decision Tree": {
       "search": "RandomizedSearchCV",
@@ -62,7 +62,7 @@
       },
       "best_val_pr_auc": 0.2328042871099795,
       "best_train_pr_auc": 0.35325101481030935,
-      "search_seconds": 144.4
+      "search_seconds": 45.3
     },
     "Random Forest": {
       "search": "RandomizedSearchCV",
@@ -95,7 +95,7 @@
       },
       "best_val_pr_auc": 0.32348103027782277,
       "best_train_pr_auc": 0.9451995934983023,
-      "search_seconds": 294.4
+      "search_seconds": 150.4
     }
   }
 }
