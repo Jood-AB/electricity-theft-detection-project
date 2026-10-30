@@ -1,0 +1,15 @@
+step,version,how,seconds,peak_mb,result_mb,cv_pr_auc
+Load SGCC training file,before,float64 (pandas default),2.55,565.7,283.9,
+Load SGCC training file,middle,"float32 readings, whole file at once",3.57,1269.1,143.5,
+Load SGCC training file,after,"float32 readings, 5,000 rows per chunk",4.19,295.5,143.5,
+Load OEDI training file,before,float64 (pandas default),0.44,124.5,92.8,
+Load OEDI training file,middle,"float32 readings, whole file at once",0.68,191.4,76.0,
+Load OEDI training file,after,"float32 readings, 5,000 rows per chunk",1.19,68.4,76.0,
+SGCC sudden-drop feature,before,pandas rolling on a transposed copy,2.54,596.8,,
+SGCC sudden-drop feature,after,"NumPy, 2,000 customers per batch",0.86,82.9,,
+"Fit Random Forest on SGCC (1,043 columns)",before,float64 input (copied to float32 inside),6.96,424.2,,
+"Fit Random Forest on SGCC (1,043 columns)",after,float32 input (no copy),6.6,185.6,,
+"Predict 420,480 OEDI hours (Random Forest)",before,all rows at once,0.63,138.2,,
+"Predict 420,480 OEDI hours (Random Forest)",after,"100,000 rows per batch",0.69,43.5,,
+Random Forest 3-fold CV on SGCC,before,"all 1,043 columns",12.92,267.1,,0.289
+Random Forest 3-fold CV on SGCC,after,"PCA: 1,035 readings -> 20 components + 8 other columns",10.58,448.0,,0.32

@@ -25,6 +25,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from src.utils import read_csv_in_chunks
+
 # Names of the two non-reading columns in the raw file.
 ID_COL = "CONS_NO"
 LABEL_COL = "FLAG"
@@ -50,7 +52,8 @@ def load_sgcc(csv_path):
     # Every column except the ID and the label is a daily reading.
     dtypes = {col: np.float32 for col in columns if col not in (ID_COL, LABEL_COL)}
     dtypes[LABEL_COL] = np.int8  # 0 or 1 fits in one byte
-    return pd.read_csv(csv_path, dtype=dtypes)
+    # Read in chunks to keep peak memory low (PR 7, see src/utils.py).
+    return read_csv_in_chunks(csv_path, dtype=dtypes)
 
 
 def split_info_and_readings(df):

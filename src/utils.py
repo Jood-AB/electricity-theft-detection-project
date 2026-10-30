@@ -4,6 +4,10 @@ import os
 import random
 
 import numpy as np
+import pandas as pd
+
+# Rows read at a time by read_csv_in_chunks.
+READ_CHUNK_ROWS = 5000
 
 
 def set_seed(seed):
@@ -29,3 +33,26 @@ def set_seed(seed):
     np.random.seed(seed)
     # Python's hashing, which can affect the order of some operations.
     os.environ["PYTHONHASHSEED"] = str(seed)
+
+
+def read_csv_in_chunks(csv_path, dtype, chunk_rows=READ_CHUNK_ROWS):
+    """Read a CSV file a few thousand rows at a time and join the pieces.
+
+    Memory optimization (PR 7): passing dtype=float32 to pd.read_csv halves
+    the memory of the finished table, but on the whole SGCC file the reader
+    still needs far more memory while it works (about 1.3 GB at its peak
+    for the 144 MB training table). Reading `chunk_rows` rows at a time
+    keeps only one small piece in the reader at once, which cut the peak
+    to about 0.3 GB. The result is exactly the same table. Numbers are in
+    outputs/results/efficiency.csv.
+
+    Args:
+        csv_path: path to the CSV file.
+        dtype: column types, as for pd.read_csv (e.g. {"col": np.float32}).
+        chunk_rows: number of rows read at a time.
+
+    Returns:
+        DataFrame with the whole file.
+    """
+    chunks = pd.read_csv(csv_path, dtype=dtype, chunksize=chunk_rows)
+    return pd.concat(chunks, ignore_index=True)

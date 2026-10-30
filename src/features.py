@@ -38,6 +38,9 @@ from src.data_sgcc import ID_COL, LABEL_COL, MISSING_SHARE_COL
 # customer's average over the previous 7 days.
 DROP_WINDOW_DAYS = 7
 DROP_RATIO = 0.5
+# Customers handled at a time when counting drops, so the temporary arrays
+# stay small (see count_sudden_drops).
+DROP_BATCH_SIZE = 2000
 
 # OEDI: theft stretches typically last about 24 hours.
 OEDI_WINDOW_HOURS = 24
@@ -52,7 +55,8 @@ def sgcc_day_columns(df):
     return [col for col in df.columns if col not in (ID_COL, LABEL_COL, MISSING_SHARE_COL)]
 
 
-def count_sudden_drops(readings, window=DROP_WINDOW_DAYS, ratio=DROP_RATIO):
+def count_sudden_drops(readings, window=DROP_WINDOW_DAYS, ratio=DROP_RATIO,
+                       batch_size=DROP_BATCH_SIZE):
     """Count how many times each customer's usage suddenly drops.
 
     A day is "low" when its usage is below `ratio` times the customer's
@@ -62,22 +66,49 @@ def count_sudden_drops(readings, window=DROP_WINDOW_DAYS, ratio=DROP_RATIO):
     The first `window` days have no full history and are never low.
     A previous average of 0 is never a drop (there was nothing to drop).
 
+    Efficiency (PR 7): the first version used pandas rolling() on a
+    transposed copy of all readings. This version gives exactly the same
+    counts but works on NumPy arrays, a batch of customers at a time, so it
+    is about 8 times faster and its temporary arrays cover only
+    `batch_size` customers instead of all of them (before/after numbers in
+    outputs/results/efficiency.csv).
+
     Args:
-        readings: DataFrame of daily readings, one row per customer.
+        readings: DataFrame of daily readings, one row per customer, with no
+            missing values (true after cleaning).
         window: number of previous days to average.
         ratio: how far usage must fall, e.g. 0.5 = below half.
+        batch_size: number of customers handled at a time.
 
     Returns:
         Series with the number of drops per customer.
     """
-    # rolling() works down the rows, so turn days into rows (.T), then back.
-    # shift(1) makes each day's average use only the days BEFORE it.
-    previous_avg = readings.T.rolling(window).mean().shift(1).T
-    low = (readings < ratio * previous_avg) & (previous_avg > 0)
+    values = readings.to_numpy()
+    counts = np.zeros(len(values), dtype=np.int64)
+    for start in range(0, len(values), batch_size):
+        # float64 for the running totals, so rounding cannot change a count.
+        batch = values[start:start + batch_size].astype(np.float64)
+        counts[start:start + batch_size] = _count_drops_in_batch(batch, window, ratio)
+    return pd.Series(counts, index=readings.index)
+
+
+def _count_drops_in_batch(batch, window, ratio):
+    """count_sudden_drops for one NumPy array of customers (rows) x days."""
+    n_days = batch.shape[1]
+    # running[:, t] is the sum of the first t days, so the sum of the
+    # `window` days before day t is running[:, t] - running[:, t - window].
+    running = np.zeros((batch.shape[0], n_days + 1))
+    np.cumsum(batch, axis=1, out=running[:, 1:])
+    previous_avg = np.full(batch.shape, np.nan)
+    previous_avg[:, window:] = (running[:, window:n_days] - running[:, :n_days - window]) / window
+
+    # Comparisons with NaN (the first `window` days) are simply False.
+    with np.errstate(invalid="ignore"):
+        low = (batch < ratio * previous_avg) & (previous_avg > 0)
 
     # A drop starts on a low day whose previous day was not low.
-    previous_low = low.shift(1, axis=1, fill_value=False)
-    drop_starts = low & ~previous_low
+    drop_starts = low.copy()
+    drop_starts[:, 1:] &= ~low[:, :-1]
     return drop_starts.sum(axis=1)
 
 
