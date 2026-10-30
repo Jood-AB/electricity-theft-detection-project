@@ -1,0 +1,17 @@
+building_type,normal_hours,false_positive_rate
+SecondarySchool,5256,0.03671993911719939
+Warehouse,5200,0.019807692307692307
+QuickServiceRestaurant,5150,0.006990291262135922
+StripMall,5264,0.001519756838905775
+OutPatient,5304,0.000942684766214178
+Stand-aloneRetail,5022,0.00019912385503783353
+LargeHotel,5048,0.0
+FullServiceRestaurant,5101,0.0
+PrimarySchool,5161,0.0
+MidriseApartment,5328,0.0
+MediumOffice,5106,0.0
+LargeOffice,5352,0.0
+Hospital,5053,0.0
+SmallHotel,5335,0.0
+SmallOffice,4939,0.0
+SuperMarket,5250,0.0

@@ -1,0 +1,2 @@
+dataset,predictions,threshold,TN,FP,FN,TP,false_positive_rate,false_negative_rate,false_alarms_among_flags
+sgcc,test,0.48,7028,724,387,335,0.0933952528379773,0.53601108033241,0.6836638338054769

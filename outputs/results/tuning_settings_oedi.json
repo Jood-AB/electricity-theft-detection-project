@@ -28,7 +28,7 @@
       },
       "best_val_pr_auc": 0.6769667226878106,
       "best_train_pr_auc": 0.6775796167748694,
-      "search_seconds": 3.4
+      "search_seconds": 2.0
     },
     "Decision Tree": {
       "search": "RandomizedSearchCV",
@@ -62,7 +62,7 @@
       },
       "best_val_pr_auc": 0.8643403584200158,
       "best_train_pr_auc": 0.9217617376910482,
-      "search_seconds": 19.6
+      "search_seconds": 10.6
     },
     "Random Forest": {
       "search": "RandomizedSearchCV",
@@ -94,9 +94,9 @@
         "max_features": "sqrt",
         "max_depth": 20
       },
-      "best_val_pr_auc": 0.9533893203204892,
-      "best_train_pr_auc": 0.999497234149333,
-      "search_seconds": 1488.8
+      "best_val_pr_auc": 0.9533893204591669,
+      "best_train_pr_auc": 0.9994972341493273,
+      "search_seconds": 1029.3
     }
   }
 }
