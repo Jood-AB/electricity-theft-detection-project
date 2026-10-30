@@ -140,7 +140,7 @@ The exploratory data analysis notebooks run in Google Colab. See
 
    Results are saved in `outputs/results/` and `outputs/figures/`.
 
-4. **Tune the models** (about 30 minutes on a laptop; uses the training data only):
+4. **Tune the models** (about 40 minutes on a laptop; uses the training data only):
 
    ```
    python -m src.tuning           # cross-validated search, both datasets
