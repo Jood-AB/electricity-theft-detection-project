@@ -23,7 +23,11 @@ Improvements measured:
 Only the TRAINING files are used; the test set is never touched.
 
 How memory is measured: Python's tracemalloc records the highest amount of
-memory allocated while a step runs (NumPy and pandas arrays included).
+memory allocated while a step runs (NumPy and pandas arrays included). We
+call this "peak Python/NumPy memory": memory that compiled code allocates
+on its own, such as scikit-learn building its trees in C, is not counted.
+So the Random Forest numbers mostly show the float64 -> float32 copy, not
+the whole fit; the before/after difference is still correct.
 Time is measured in a separate run without tracemalloc, which slows code
 down. Times depend on the computer, so compare before and after on the
 same machine rather than the exact seconds.
@@ -220,7 +224,7 @@ def plot(results, path):
     steps = list(dict.fromkeys(results["step"]))
     fig, axes = plt.subplots(1, 2, figsize=(11, 0.6 * len(steps) + 1.5), sharey=True)
     y = np.arange(len(steps))
-    for ax, col, label in [(axes[0], "seconds", "Time (s)"), (axes[1], "peak_mb", "Peak memory (MB)")]:
+    for ax, col, label in [(axes[0], "seconds", "Time (s)"), (axes[1], "peak_mb", "Peak Python/NumPy memory (MB)")]:
         for version, color, shift in [("before", "#b0b0b0", -0.2), ("after", "#2a7ab9", 0.2)]:
             values = results[results["version"] == version].set_index("step").loc[steps, col]
             ax.barh(y + shift, values, height=0.4, color=color, label=version)

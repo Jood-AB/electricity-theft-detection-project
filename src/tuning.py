@@ -18,6 +18,13 @@ How it works for each dataset and model:
 
 The test set is not used, except with --test (team rule: once, at the end).
 
+Caveat: the cross-validated scores of the tuned models are a little
+optimistic, for two reasons. The threshold is chosen and scored on the same
+predictions (as for the baselines), and the best setting is picked on the
+same folds it is scored on, so part of a small gain over the baseline can be
+luck from trying many settings. Small gains should be called "likely" until
+the single --test run confirms them.
+
 Everything needed to repeat the search is saved: the settings that were
 tried, the number of random tries, the folds and the seed.
 
