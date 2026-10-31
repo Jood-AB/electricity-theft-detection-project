@@ -42,6 +42,8 @@ electricity-theft-detection-project/
 │   ├── data_oedi.py     # loads and cleans OEDI, splits by recording
 │   ├── prepare_data.py  # runs both cleanings and saves train/test sets
 │   ├── features.py      # builds the model features for SGCC and OEDI
+│   ├── metrics.py       # shared scores, best threshold and confusion matrix plots
+│   ├── models.py        # trains the 3 baseline models (raw and with features)
 │   ├── tuning.py        # hyperparameter tuning with cross-validation
 │   ├── efficiency.py    # memory and runtime measurements, before/after
 │   └── error_analysis.py  # false positives/negatives and feature importance
@@ -49,11 +51,16 @@ electricity-theft-detection-project/
 │   ├── README.md        # how to use Colab with this project
 │   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
 │   └── 02_eda.ipynb           # EDA: class balance, missing data, trends, normal vs theft
+├── outputs/             # everything the code produces
+│   ├── data_quality.md  # summary of the cleaning checks
+│   ├── results/         # results tables (CSV) and tuning settings (JSON)
+│   └── figures/         # charts: confusion matrices, tuning, efficiency, errors
 └── tests/               # automated checks that the code works
     ├── test_setup.py      # config and seed
     ├── test_data_sgcc.py  # SGCC cleaning steps
     ├── test_data_oedi.py  # OEDI cleaning steps
     ├── test_features.py   # feature functions
+    ├── test_models.py     # baseline training and shared metrics
     ├── conftest.py        # small made-up data shared by the tests below
     ├── test_tuning.py     # tuning and the efficiency changes
     └── test_error_analysis.py  # error analysis tables and importance
@@ -118,7 +125,11 @@ The exploratory data analysis notebooks run in Google Colab. See
 2. **Build the features** (inside your own script or notebook):
 
    ```python
+   import pandas as pd
    from src import features
+
+   sgcc_train = pd.read_csv("data/processed/sgcc/train.csv")
+   oedi_train = pd.read_csv("data/processed/oedi/train.csv")
 
    X_sgcc = features.sgcc_features(sgcc_train)   # one row per customer
    y_sgcc = sgcc_train["FLAG"]
@@ -175,8 +186,6 @@ The exploratory data analysis notebooks run in Google Colab. See
    among the highest-risk rows, and permutation feature importance
    (`errors_*.csv`, `importance_*.csv` and figures). Importance shows what
    the model relies on, not what causes theft.
-
-More steps will be added as each part of the project is completed.
 
 ## Team rules
 
