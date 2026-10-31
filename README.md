@@ -54,7 +54,7 @@ electricity-theft-detection-project/
 ├── outputs/             # everything the code produces
 │   ├── data_quality.md  # summary of the cleaning checks
 │   ├── results/         # results tables (CSV) and tuning settings (JSON)
-│   └── figures/         # charts: confusion matrices, tuning, efficiency, errors
+│   └── figures/         # charts: EDA (fig01-fig07), confusion matrices, tuning, efficiency, errors
 └── tests/               # automated checks that the code works
     ├── test_setup.py      # config and seed
     ├── test_data_sgcc.py  # SGCC cleaning steps
