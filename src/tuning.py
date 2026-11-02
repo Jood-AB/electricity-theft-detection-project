@@ -66,7 +66,7 @@ TAG = "tuned"
 # cases at the top, for any threshold.
 SCORING = "average_precision"
 # Number of random settings tried for the Decision Tree and Random Forest.
-# Logistic Regression has one setting, so all its values are tried.
+# Logistic Regression has one hyperparameter (C), so all its values are tried.
 N_ITER = 12
 
 # The settings tried for each model.

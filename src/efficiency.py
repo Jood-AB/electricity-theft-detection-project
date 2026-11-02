@@ -1,9 +1,23 @@
 """Memory and runtime measurements (PR 7): before/after numbers for the report.
 
 Each step of the project that is slow or uses a lot of memory is measured
-twice: the simple version ("before") and the improved version that the
-project code uses ("after"). Both versions must give the same result; the
-script checks this before saving any number.
+twice: the simple version ("before") and the improved version ("after").
+For steps 1-5 both versions must give the same result; the script checks
+this before saving any number. Step 6 changes the model, so its PR-AUC is
+reported instead.
+
+Which improvements the project code uses:
+    Used:          steps 1-4 (float32 + chunked reading in src/utils.py,
+                   batched NumPy drops in src/features.py, float32 input to
+                   the models in src/models.py and src/tuning.py).
+    Measured only: steps 5-6. src/models.py, src/tuning.py and
+                   src/error_analysis.py still predict all rows at once and
+                   use all SGCC columns (no PCA). Step 5 lowers peak memory
+                   but is a little slower; step 6 raised the 3-fold PR-AUC
+                   in this test but used more peak memory. Both are options
+                   for future work.
+Trade-off: chunked reading (steps 1-2) is slower than reading the whole
+file at once; it is used because it keeps peak memory much lower.
 
 Improvements measured:
     1-2. Smaller number types and batch processing: read readings as
@@ -117,7 +131,8 @@ def step_loading(dataset, path, float_cols):
 
     before:  pandas default (float64).
     middle:  dtype=float32 only. The finished table is half the size, but
-             the reader's peak memory is not lower (it is higher for SGCC).
+             the reader's peak memory is not lower (it is higher for both
+             datasets).
     after:   dtype=float32, read in chunks of rows (src/utils.py).
     """
     dtype = {c: np.float32 for c in float_cols}

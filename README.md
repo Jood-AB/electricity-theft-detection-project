@@ -46,7 +46,8 @@ electricity-theft-detection-project/
 │   ├── models.py        # trains the 3 baseline models (raw and with features)
 │   ├── tuning.py        # hyperparameter tuning with cross-validation
 │   ├── efficiency.py    # memory and runtime measurements, before/after
-│   └── error_analysis.py  # false positives/negatives and feature importance
+│   ├── error_analysis.py  # false positives/negatives and feature importance
+│   └── run_all.py       # runs every step below in order (the whole project)
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
 │   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
@@ -63,7 +64,8 @@ electricity-theft-detection-project/
     ├── test_models.py     # baseline training and shared metrics
     ├── conftest.py        # small made-up data shared by the tests below
     ├── test_tuning.py     # tuning and the efficiency changes
-    └── test_error_analysis.py  # error analysis tables and importance
+    ├── test_error_analysis.py  # error analysis tables and importance
+    └── test_run_all.py    # order of the steps in run_all.py
 ```
 
 ## Setup (local, for running the project code)
@@ -110,6 +112,15 @@ The exploratory data analysis notebooks run in Google Colab. See
 
 ## How to run
 
+**Everything at once** (about 50 minutes on a laptop):
+
+```
+python -m src.run_all          # steps 1 to 6 below, training data only
+python -m src.run_all --test   # final test-set scores (run once, at the end)
+```
+
+Or run the steps one by one:
+
 1. **Clean the data and create the train/test sets** (about 1 minute):
 
    ```
@@ -147,11 +158,15 @@ The exploratory data analysis notebooks run in Google Colab. See
 3. **Train the baseline models:**
 
    ```
-   python -m src.models           # cross-validation on the training data, both datasets
-   python -m src.models --test    # final test-set scores (run once, at the end)
+   python -m src.models                          # raw columns, cross-validation on the training data
+   python -m src.models --tag features           # raw columns + the engineered features from step 2
+   python -m src.models --test                   # final test-set scores (run once, at the end)
+   python -m src.models --tag features --test
    ```
 
-   Results are saved in `outputs/results/` and `outputs/figures/`.
+   Results are saved in `outputs/results/` (`baseline_*_raw.csv` and
+   `baseline_*_features.csv`, to compare models with and without the
+   features) and confusion matrices in `outputs/figures/`.
 
 4. **Tune the models** (about 40 minutes on a laptop; uses the training data only):
 
@@ -173,6 +188,8 @@ The exploratory data analysis notebooks run in Google Colab. See
 
    Saves before/after numbers for each optimization in
    `outputs/results/efficiency.csv` and a chart in `outputs/figures/`.
+   Steps 1-4 are used by the project code; steps 5-6 (batch prediction,
+   PCA) were measured only. See the top of `src/efficiency.py`.
 
 6. **Analyse the errors of the tuned Random Forest** (about 5 minutes, after step 4):
 

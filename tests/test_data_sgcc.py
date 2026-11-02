@@ -12,7 +12,8 @@ from src import data_sgcc
 def make_raw():
     """A tiny raw SGCC-style table: 4 customers, 5 days, dates out of order.
 
-    The day 2014/1/4 is deliberately missing from the columns.
+    The days 2014/1/4 and 2014/1/6 to 2014/1/9 are deliberately missing
+    from the columns.
     """
     return pd.DataFrame({
         "CONS_NO": ["a", "b", "c", "d"],

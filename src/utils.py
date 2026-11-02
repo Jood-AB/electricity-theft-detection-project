@@ -31,7 +31,9 @@ def set_seed(seed):
     random.seed(seed)
     # NumPy, which pandas and scikit-learn use under the hood.
     np.random.seed(seed)
-    # Python's hashing, which can affect the order of some operations.
+    # Python's hashing, which can affect the order of some operations. This
+    # only reaches processes started after this line (for example parallel
+    # workers); the running Python process keeps its own hash seed.
     os.environ["PYTHONHASHSEED"] = str(seed)
 
 
