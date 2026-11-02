@@ -20,7 +20,8 @@ Why these features (see notebooks/02_eda.ipynb):
 
 No leakage:
     - Every SGCC feature uses only that customer's own row.
-    - Every OEDI window uses only earlier hours of the same recording
+    - Every OEDI window uses only the current hour and earlier hours of the
+      same recording
       (grouped by recording_id and sorted by hour first).
     - Nothing is learned from the data (no fitted scaler or threshold), so
       the same functions can be applied to the training and test sets.

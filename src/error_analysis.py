@@ -94,7 +94,8 @@ def feature_groups(dataset, columns):
     """
     if dataset == "sgcc":
         days = [c for c in columns if c[:4].isdigit()]   # named "YYYY-MM-DD"
-        # Every SGCC column that is not a day comes from features.sgcc_features.
+        # Every SGCC column that is not a day is engineered: missing_share
+        # from the cleaning step, the rest from features.sgcc_features.
         engineered = [c for c in columns if c not in days]
         groups = {f"daily readings ({len(days):,} days)": days}
         groups.update({c: [c] for c in engineered})

@@ -19,9 +19,14 @@ Run from the project folder:
     python -m src.models --sample 2000      # quick run on a small sample (for testing the code only)
     python -m src.models --test             # final scores on the test set
 
-When Member 2's engineered features are saved as train/test files (one
-folder per dataset, same label and ID columns), run the same code on them:
-    python -m src.models --data-dir data/features --tag features
+With Member 2's engineered features (src/features.py) added to the raw
+columns. The features are built while loading, so no extra files are needed:
+    python -m src.models --tag features
+    python -m src.models --tag features --test
+
+Caveat: the cross-validated scores are a little optimistic, because each
+threshold is chosen and scored on the same predictions. The --test scores
+are the honest numbers.
 """
 
 import argparse
@@ -58,7 +63,7 @@ DATASETS = {
              "group": "recording_id"},
 }
 
-N_FOLDS = 3  # 3 folds keeps Random Forest fast enough for Colab
+N_FOLDS = 3  # 3 folds keeps Random Forest fast enough on a laptop
 
 
 def load_xy(dataset, split="train", data_dir=DATA_DIR, add_features=False):
@@ -198,7 +203,8 @@ def main():
     parser.add_argument("--data-dir", default=str(DATA_DIR),
                         help="folder with <dataset>/train.csv and test.csv")
     parser.add_argument("--tag", default="raw",
-                        help="name for this feature set in output files, e.g. raw or features")
+                        help="'features' adds the engineered features from src/features.py; "
+                             "any other value uses the raw columns only. Also used in output file names")
     args = parser.parse_args()
 
     datasets = ["sgcc", "oedi"] if args.dataset == "all" else [args.dataset]
