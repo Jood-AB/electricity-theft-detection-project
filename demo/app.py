@@ -462,8 +462,11 @@ def page_case(table, notes, inputs, saved):
         head.markdown(f"## {case['short_id']}")
         head.caption(f"Full ID: {case['id']} · assigned to {case['inspector']}"
                      + (f" · **real label: {case['true_label']}**" if supervisor else ""))
-        badge.metric("Theft risk", f"{case['score']:.0%}",
-                     f"{DOT[case['risk']]} {case['risk']}", delta_color="off")
+        badge.metric("Risk score", f"{case['score']:.0%}",
+                     f"{DOT[case['risk']]} {case['risk']}", delta_color="off",
+                     help="How much this case looks like the theft cases the model learned "
+                          "from (average of 300 trees). It is a ranking score, not the chance "
+                          "of theft: many high-score cases turn out to be normal.")
 
         # Usage chart
         if state.dataset == "sgcc":
