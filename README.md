@@ -48,6 +48,10 @@ electricity-theft-detection-project/
 │   ├── efficiency.py    # memory and runtime measurements, before/after
 │   ├── error_analysis.py  # false positives/negatives and feature importance
 │   └── run_all.py       # runs every step below in order (the whole project)
+├── demo/
+│   └── app.py           # TheftLens demo web app (Streamlit), see "Demo app" below
+├── .streamlit/
+│   └── config.toml      # light theme of the demo app
 ├── notebooks/           # notebooks (Google Colab)
 │   ├── README.md        # how to use Colab with this project
 │   ├── 01_data_quality.ipynb  # data checks behind each cleaning decision
@@ -203,6 +207,47 @@ Or run the steps one by one:
    among the highest-risk rows, and permutation feature importance
    (`errors_*.csv`, `importance_*.csv` and figures). Importance shows what
    the model relies on, not what causes theft.
+
+## Demo app (TheftLens)
+
+A small web app that shows how an inspector could use the tuned Random
+Forest. It only scores the test set with the saved models and their saved
+thresholds; nothing is trained in the app.
+
+1. Run steps 1 and 4 above first (`src.prepare_data` and `src.tuning`), so
+   the cleaned data and `outputs/models/*_tuned_random_forest.joblib` exist.
+   `src.tuning` rewrites some files in `outputs/results/`; to keep the
+   report numbers as they are, run `git checkout -- outputs/results/` after it.
+2. Start the app:
+
+   ```
+   streamlit run demo/app.py --server.address localhost
+   ```
+
+   It opens at http://localhost:8501. The first start takes about
+   15 seconds (it scores the test sets); later starts are faster.
+
+**What it shows**
+
+- **Sign in** as an inspector (Jood, Sadeem, Asma, Hessa) or the supervisor
+  (Dr. Heyfa). Demo only, no passwords.
+- **Cases** in a mixed order, with tabs by risk level and an ID search.
+  High- and medium-risk cases are split evenly between the inspectors. The
+  supervisor also sees team progress and can filter by the real label.
+- **One case:** usage chart, the patterns that stand out compared with
+  normal training customers, and a review (likely cause, decision, notes)
+  saved to `demo/notes.csv` (not on GitHub).
+
+**Risk score and levels.** The score is the Random Forest's average over its
+300 trees; for OEDI, the average of a day's 24 hourly scores. It is a ranking
+score, not the chance of theft: on SGCC only about 32% of high-risk customers
+are real theft.
+
+| Level | Rule | SGCC | OEDI |
+|---|---|---|---|
+| 🔴 High (flagged) | score ≥ the model's threshold | ≥ 0.48 | ≥ 0.68 |
+| 🟠 Medium | at least half the threshold | 0.24-0.48 | 0.34-0.68 |
+| 🟢 Low | below half the threshold | < 0.24 | < 0.34 |
 
 ## Team rules
 
